@@ -1,0 +1,35 @@
+<svg width="600" height="1000" viewBox="0 0 600 1000" xmlns="http://www.w3.org/2000/svg">
+  <!-- Silhouette humaine avec lignes horizontales -->
+  <defs>
+    <linearGradient id="silhouetteGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.85"/>
+    </linearGradient>
+    
+    <!-- Masque pour les lignes horizontales -->
+    <pattern id="lines" width="10" height="10" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="5" x2="600" y2="5" stroke="#ffffff" stroke-width="1"/>
+    </pattern>
+    
+    <mask id="silhouetteMask">
+      <!-- Silhouette de base -->
+      <path fill="white" d="M300,150 C340,150 370,180 370,220 C370,260 340,290 300,290 C260,290 230,260 230,220 C230,180 260,150 300,150 Z"/>
+      <path fill="white" d="M300,290 L300,290 C350,290 390,310 390,350 L390,650 C390,670 380,690 360,700 L320,720 L320,900 C320,920 310,940 290,950 L290,950 C270,960 250,950 240,930 L240,720 L200,700 C180,690 170,670 170,650 L170,350 C170,310 210,290 260,290 L300,290 Z"/>
+      <!-- Bras -->
+      <path fill="white" d="M390,350 L390,350 C410,360 430,380 440,400 L480,500 C490,520 480,550 460,560 L460,560 C440,570 410,560 400,540 L350,440 L390,350 Z"/>
+      <path fill="white" d="M170,350 L170,350 C150,360 130,380 120,400 L80,500 C70,520 80,550 100,560 L100,560 C120,570 150,560 160,540 L210,440 L170,350 Z"/>
+    </mask>
+  </defs>
+
+  <!-- Fond transparent -->
+  <rect width="600" height="1000" fill="none"/>
+
+  <!-- Silhouette avec lignes -->
+  <g mask="url(#silhouetteMask)">
+    <!-- Remplissage de base -->
+    <rect width="600" height="1000" fill="url(#silhouetteGradient)"/>
+    <!-- Lignes horizontales -->
+    <rect width="600" height="1000" fill="url(#lines)"/>
+  </g>
+</svg>
+
