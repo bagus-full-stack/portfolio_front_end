@@ -1,5 +1,3 @@
-"use client"
-
 export interface Author {
   id: string
   name: string
@@ -463,4 +461,3 @@ export function getPostsByTag(tag: string): Post[] {
 export function getPostsByCategory(category: string): Post[] {
   return posts.filter((post) => post.category === category)
 }
-
