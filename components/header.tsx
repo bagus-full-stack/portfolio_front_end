@@ -30,11 +30,11 @@ export function Header() {
   }, [])
 
   const navItems = [
-    { name: "Accueil", href: "#hero" },
-    { name: "À propos", href: "#about" },
-    { name: "Projets", href: "#projects" },
+    { name: "Accueil", href: "/#hero" },
+    { name: "À propos", href: "/#about" },
+    { name: "Projets", href: "/#projects" },
     { name: "Blog", href: "/blog" },
-    { name: "Contact", href: "#contact" },
+    { name: "Contact", href: "/#contact" },
     { name: "Admin", href: "/admin", isButton: true },
   ]
 

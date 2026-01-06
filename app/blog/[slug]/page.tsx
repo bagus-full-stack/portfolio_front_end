@@ -2,6 +2,7 @@ import { BlogPost } from "@/components/blog-post"
 import { getPostBySlug, getPosts } from "@/lib/blog"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
+import { Header } from "@/components/header"
 
 interface BlogPostPageProps {
   params: {
@@ -42,8 +43,8 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
 
   return (
     <main className="min-h-screen bg-background pt-20">
+      <Header />
       <BlogPost post={post} />
     </main>
   )
 }
-

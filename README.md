@@ -1,143 +1,130 @@
-# Portfolio Futuriste (Frontend)
+# Portfolio Futuriste — Frontend
 
-Un portfolio moderne construit avec Next.js (app router), TypeScript et Tailwind CSS. Ce dépôt contient la partie frontend d'un portfolio personnel — pages, composants, sections, et un mini-système de blog statique pour présenter des articles.
+Une application frontend de portfolio moderne construite avec Next.js (App Router), TypeScript et Tailwind CSS. Ce dépôt contient l'interface publique (pages, composants, mini-blog statique) et des primitives UI réutilisables.
+
+Résumé
+- Framework : Next.js (App Router)
+- Langage : TypeScript + React
+- Styles : Tailwind CSS
+- Gestionnaire : pnpm
+
+Objectif
+Ce projet sert de base pour un portfolio personnel : page d'accueil, sections projets, blog statique, tableau de bord admin (placeholder), et une librairie de composants UI. Il met l'accent sur les bonnes pratiques Next.js (app router, SSG/SSR) et l'organisation modulaire.
 
 Table des matières
-- Description
-- Fonctionnalités
-- Stack technique
+- Fonctionnalités principales
+- Architecture du projet
 - Prérequis
-- Installation et exécution
-- Scripts utiles
-- Structure du projet
-- Système de blog (comment ajouter un article)
-- Développement & bonnes pratiques
+- Installation et commandes
+- Développement : bonnes pratiques
+- Système de blog (comment ça marche)
+- Navigation et Header
+- Résolution d'erreurs courantes
 - Déploiement
-- Dépannage (FAQ)
 - Contribution
 - Licence
 
-Description
+Fonctionnalités principales
+- Pages construites avec le dossier `app/` (App Router)
+- Composants réutilisables en TypeScript dans `components/`
+- Thème clair/sombre
+- Mini-système de blog statique (données en `lib/blog.ts`) pré-rendu (SSG) via `generateStaticParams`
+- UI responsive et composants d'accessibilité de base
 
-Ce projet est conçu comme un portfolio personnel réactif et performant. Il utilise le nouveau dossier `app/` de Next.js pour tirer parti du rendu côté serveur (SSR) et de la génération statique (SSG). Le site contient : une page d'accueil, une page blog avec articles statiques, une section admin (page statique pour l'instant), et de nombreux composants réutilisables (UI) fournis dans `components/`.
-
-Fonctionnalités
-- Pages construites avec le `app/` router de Next.js
-- Composants React TypeScript réutilisables
-- Thème lumineux/sombre et gestion du mode
-- Mini-système de blog (articles définis dans `lib/blog.ts`)
-- Pré-rendu SSG des pages d'article (`/blog/[slug]`) pour de bonnes performances
-- Intégration Tailwind CSS pour le style
-
-Stack technique
-- Next.js (App Router)
-- React + TypeScript
-- Tailwind CSS
-- pnpm comme gestionnaire de paquets
+Architecture du projet (points clés)
+- `app/` — routes et pages (layout, error boundaries, metadata)
+  - `app/blog/page.tsx` — index du blog
+  - `app/blog/[slug]/page.tsx` — page de détail d'un article (SSG)
+- `components/` — composants et sections (ex: `header.tsx`, `blog-card.tsx`, `blog-post.tsx`, `ui/*`)
+- `lib/` — utilitaires et données (ex: `lib/blog.ts`, `lib/utils.ts`)
+- `services/` — wrappers pour récupération de données (placeholder)
+- `public/` — assets statiques (images, icônes)
+- `styles/` — styles globaux (Tailwind)
 
 Prérequis
-- Node.js (version compatible avec Next.js 15 — idéalement >= 18)
-- pnpm (recommandé, mais npm/yarn fonctionnent si on adapte les commandes)
+- Node.js (recommandé >= 18)
+- pnpm installé globalement (ou npm/yarn en adaptant les commandes)
 
-Installation et exécution
-
-1) Installez les dépendances :
+Installation et commandes
+1. Installer les dépendances :
 
 ```powershell
 pnpm install
 ```
 
-2) Mode développement :
+2. Mode développement :
 
 ```powershell
 pnpm dev
 ```
 
-3) Build de production :
+3. Build production :
 
 ```powershell
 pnpm build
 ```
 
-4) Lancer la version construite :
+4. Démarrer la version de production :
 
 ```powershell
 pnpm start
 ```
 
-Scripts utiles (depuis package.json)
-- `pnpm dev` — lance le serveur de développement
-- `pnpm build` — construit l'application pour la production
-- `pnpm start` — démarre l'application construite
-- `pnpm lint` / `pnpm test` — (s'il existe) lance les outils de lint/tests (selon configuration)
+Commandes utiles
+- `pnpm dev` — serveur de développement (hot-reload)
+- `pnpm build` — build de production (Next.js)
+- `pnpm start` — démarre le server produit
+- `npx tsc --noEmit` — vérification TypeScript sans générer de fichiers
 
-Structure du projet (les principaux dossiers/fichiers)
+Développement : bonnes pratiques
+- Séparer les composants client (`"use client"`) et serveur. Les fonctions de récupération de données (ex. `lib/blog.ts`) doivent rester server-side si elles sont utilisées par `generateStaticParams` / `generateMetadata`.
+- Eviter d'importer des composants client-only *dans* des fonctions de génération statique.
+- Mettre les composants partagés (Header, Footer) dans `app/layout.tsx` si vous souhaitez qu'ils apparaissent sur toutes les pages.
 
-- app/ — pages et routes (Next.js app router)
-  - blog/[slug]/page.tsx — rendu des articles de blog (SSG)
-  - layout.tsx, page.tsx, not-found.tsx, etc.
-- components/ — composants UI et sections réutilisables
-  - ui/ — primitives UI (boutons, cartes, modales...)
-  - blog-post.tsx, blog-list.tsx, header.tsx, footer.tsx, etc.
-- lib/ — utilitaires et données (ex. `lib/blog.ts`, `lib/utils.ts`)
-- services/ — services pour récupérer/transformer des données (ex. ProfileService)
-- public/ — images statiques et assets
-- styles/ — fichiers CSS globaux
-- next.config.mjs, tsconfig.json, tailwind.config.js — configuration du projet
+Système de blog — comment ça marche
+- Les articles sont actuellement définis sous forme d'un tableau dans `lib/blog.ts` (objet `posts`).
+- `getPosts()` et `getPostBySlug(slug)` exposent l'accès aux articles.
+- La page `app/blog/[slug]/page.tsx` utilise `generateStaticParams` pour lister les slugs et pré-générer les pages (SSG).
 
-Système de blog
-
-Actuellement, les articles sont définis directement dans `lib/blog.ts` en tant que tableau `posts`. `lib/blog.ts` expose plusieurs helpers :
-
-- `getPosts()` — retourne tous les posts
-- `getPostBySlug(slug)` — récupère un post par son slug
-- `getFeaturedPosts()` / `getRecentPosts()` / `getPostsByTag()` / `getPostsByCategory()`
-
-Comment ajouter un article aujourd'hui :
+Ajouter un article (rapide)
 1. Ouvrir `lib/blog.ts`.
-2. Ajouter un nouvel objet `Post` au tableau `posts` avec les champs requis : `id`, `title`, `slug`, `excerpt`, `content`, `date`, `readingTime`, `image`, `author`, `tags`, `category`, etc.
-3. Relancer `pnpm build` pour que la route SSG `/blog/[slug]` soit générée avec le nouveau slug.
+2. Ajouter un objet `Post` au tableau `posts` avec les champs :
+   - `id`, `title`, `slug`, `excerpt`, `content`, `date`, `readingTime`, `image`, `author`, `tags`, `category`, etc.
+3. Lancer `pnpm build` pour que la nouvelle route soit générée statiquement.
 
-Remarque : pour une solution plus souple et évolutive, je recommande de migrer les articles vers des fichiers Markdown sous `content/blog/*.md` et d'utiliser un loader (ex. `gray-matter` + parsing) pour générer les données. Je peux t'aider à automatiser cette migration si tu veux.
+Remarque : pour une expérience de contenu plus évolutive, migrer les articles vers des fichiers Markdown (`content/blog/*.md`) et parser via `gray-matter`/MDX.
 
-Développement & bonnes pratiques
+Navigation et Header
+- Le composant `Header` est un composant client (contient `"use client"`) car il utilise des hooks et des animations. Pour qu'il apparaisse sur des pages générées côté serveur, vous avez deux options :
+  1. Le placer dans `app/layout.tsx` (recommandé) pour qu'il soit inclus globalement et géré correctement par Next.js.
+  2. L'importer dans chaque page en tant que composant client — c'est acceptable tant que l'import se fait dans un composant rendu côté client (ou directement dans le JSX d'une page server), Next.js va hydrater le composant côté client.
 
-- Respecte la séparation server/client : les helpers utilisés dans `generateStaticParams` / `generateMetadata` doivent être importables côté serveur (ne pas mettre `"use client"` dans ces modules). Sinon, Next.js refusera l'appel serveur -> client et la génération SSG échouera.
-- Préfère des composants statiques/serveur (`'use client'` uniquement pour les composants qui utilisent des hooks React ou l'API DOM)
-- Tester localement avec `pnpm dev` avant de builder en production.
+Dans ce projet :
+- `app/blog/page.tsx` inclut déjà le `Header`.
+- `app/blog/[slug]/page.tsx` a été mis à jour pour inclure `Header` également, afin d'assurer la navigation depuis les pages d'article vers le reste du site.
 
-Dépannage (FAQ)
-
-Q: Build error "Failed to collect page data for /blog/[slug]"
-- Cause fréquente : un utilitaire utilisé par `generateStaticParams` ou `generateMetadata` est marqué client-only (contenant `"use client"`).
-- Solution : retirer `"use client"` du module utilitaire (ex. `lib/blog.ts`) ou rendre les helpers disponibles côté serveur.
-
-Q: Warnings concernant des caractères non-ASCII dans les strings
-- Ces warnings proviennent d'outils d'analyse/compilation qui inspectent les tokens. Ils sont généralement non bloquants. Pour les supprimer, tu peux :
-  - externaliser le contenu texte dans des fichiers markdown;
-  - configurer ton linter/analyseur pour accepter UTF-8 / français.
+Résolution d'erreurs courantes
+- Erreur "Failed to collect page data for /blog/[slug]" :
+  - Cause fréquente : import d'un module client-only (contenant `"use client"`) dans une méthode server-side (ex. `generateStaticParams` ou `generateMetadata`).
+  - Vérifier : retirer `"use client"` des utilitaires, ou déplacer la logique côté serveur.
+- Warnings sur caractères non-ASCII dans des strings : ces warnings viennent d'outils d'analyse et sont généralement non bloquants. Pour les éliminer, externalisez le contenu dans des fichiers markdown/JSON ou ajustez la configuration de l'analyseur.
 
 Déploiement
-
-- Déploiement recommandé : Vercel (intégration native Next.js). Les étapes générales :
-  1. Pousser le projet sur GitHub/GitLab.
-  2. Connecter le dépôt sur Vercel et déployer (les builds Next.js sont reconnus automatiquement).
-- Vérifie les variables d'environnement et la version Node.js dans la configuration de la plateforme.
+- Plateforme recommandée : Vercel (intégration Next.js native).
+- Branches/CI : configurez l'environnement Node.js (version) et variables d'environnement si besoin.
 
 Contribution
-
-- Fork → clone → nouvelle branche → PR.
-- Respecte les conventions TypeScript et Tailwind du projet.
+- Fork → clone → branche feature → PR
+- Respectez les conventions TypeScript/Tailwind du projet
 
 Licence
-
-- (Indique ta licence ici, ex. MIT) : MIT © TonNom
+- MIT (ou la licence de votre choix) — remplacez par vos informations si nécessaire.
 
 Besoin d'aide supplémentaire ?
-- Veux-tu que je :
-  - migre les articles vers Markdown et adapte `lib/blog.ts` ?
-  - nettoie les warnings non-ASCII ?
-  - ajoute un script de génération d'articles / un petit CMS local ?
+- Je peux :
+  - Migrer les articles vers Markdown et adapter `lib/blog.ts`.
+  - Déplacer le `Header` dans `app/layout.tsx` pour le rendre global.
+  - Nettoyer les warnings non-ASCII ou externaliser le contenu.
 
-Je peux implémenter n'importe laquelle de ces options — dis-moi laquelle et je le fais.
-
+Contact
+- Si tu veux que j'applique automatiquement une de ces améliorations, dis-moi laquelle et je l'ajoute.
