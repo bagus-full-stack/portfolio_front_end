@@ -7,6 +7,9 @@ import { Loader2, Check, AlertTriangle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
+// Time to display success message before redirecting to home
+const REDIRECT_DELAY_MS = 1500
+
 export default function AuthCallbackPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -33,18 +36,16 @@ export default function AuthCallbackPage() {
         }
 
         // Store the token in localStorage (same as regular login)
-        if (typeof window !== "undefined") {
-          localStorage.setItem("token", token)
-        }
+        localStorage.setItem("token", token)
 
         setStatus("success")
 
         // Redirect to home page after a short delay
         setTimeout(() => {
           router.replace("/")
-        }, 1500)
+        }, REDIRECT_DELAY_MS)
       } catch (err) {
-        console.error("Erreur lors du traitement du callback OAuth:", err)
+        console.error("OAuth callback error:", err)
         setStatus("error")
         setErrorMessage("Une erreur est survenue lors de l'authentification.")
       }
