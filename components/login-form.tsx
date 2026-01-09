@@ -36,7 +36,7 @@ export function LoginForm() {
         try {
             await userService.login({ username, password })
             setIsLoggedIn(true)
-            router.push("/")
+            router.replace("/")
         } catch (err) {
             console.error("Erreur de connexion:", err)
 
