@@ -6,10 +6,12 @@ import { ModeToggle } from "@/components/mode-toggle"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
+import { userService } from "@/services/UserServices"
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   useEffect(() => {
     // Vérifier si window est défini (côté client uniquement)
@@ -20,6 +22,9 @@ export function Header() {
 
       // Définir l'état initial
       setIsScrolled(window.scrollY > 10)
+      
+      // Vérifier l'authentification
+      setIsAuthenticated(userService.isAuthenticated())
 
       // Ajouter l'écouteur d'événement
       window.addEventListener("scroll", handleScroll)
@@ -35,7 +40,7 @@ export function Header() {
     { name: "Projets", href: "/#projects" },
     { name: "Blog", href: "/blog" },
     { name: "Contact", href: "/#contact" },
-    { name: "Admin", href: "/admin", isButton: true },
+    ...(isAuthenticated ? [{ name: "Admin", href: "/admin", isButton: true }] : []),
   ]
 
   return (
