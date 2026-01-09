@@ -2,14 +2,14 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { useRouter } from "next/navigation"
-import { Lock, User, LogIn, Check, AlertTriangle, Loader2 } from "lucide-react"
+import { Lock, User, Mail, UserPlus, Check, AlertTriangle, Loader2 } from "lucide-react"
 import { userService } from "@/services/UserServices"
 import axios from "axios"
 import Link from "next/link"
@@ -48,49 +48,68 @@ const LinkedInIcon = () => (
   </svg>
 )
 
-export function LoginForm() {
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+export function RegisterForm() {
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    firstName: "",
+    lastName: "",
+  })
   const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
-  // Vérifier si l'utilisateur est déjà connecté (via localStorage)
-  useEffect(() => {
-    // Vérifier si window est défini (côté client uniquement)
-    if (typeof window !== "undefined" && userService.isAuthenticated()) {
-      setIsLoggedIn(true)
-    }
-  }, [])
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError("")
+    setSuccess("")
+
+    // Validation
+    if (formData.password !== formData.confirmPassword) {
+      setError("Les mots de passe ne correspondent pas.")
+      setIsLoading(false)
+      return
+    }
+
+    if (formData.password.length < 6) {
+      setError("Le mot de passe doit contenir au moins 6 caractères.")
+      setIsLoading(false)
+      return
+    }
 
     try {
-      await userService.login({ username, password })
-      setIsLoggedIn(true)
-      router.replace("/")
+      await userService.create({
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        role: "user",
+      })
+      setSuccess("Compte créé avec succès ! Redirection vers la page de connexion...")
+      setTimeout(() => {
+        router.push("/login")
+      }, 2000)
     } catch (err) {
-      console.error("Erreur de connexion:", err)
+      console.error("Erreur lors de l'inscription:", err)
 
       if (axios.isAxiosError(err) && err.response) {
-        setError(err.response.data.message || "Identifiants incorrects. Veuillez réessayer.")
+        setError(err.response.data.message || "Une erreur est survenue lors de l'inscription.")
       } else {
-        setError("Une erreur est survenue. Vérifiez votre connexion et réessayez.")
+        setError("Une erreur est survenue. Vérifiez votre connexion.")
       }
     } finally {
       setIsLoading(false)
     }
-  }
-
-  const handleLogout = () => {
-    userService.logout()
-    setIsLoggedIn(false)
-    setUsername("")
-    setPassword("")
   }
 
   const handleSocialLogin = (provider: string) => {
@@ -105,37 +124,17 @@ export function LoginForm() {
     window.location.href = `${API_URL}/auth/${provider}`
   }
 
-  if (isLoggedIn) {
-    return (
-      <Card className="w-full max-w-md mx-auto border-0 shadow-2xl bg-gradient-to-br from-card via-card to-card/95">
-        <CardContent className="p-6">
-          <div className="flex flex-col items-center justify-center space-y-4">
-            <div className="p-3 rounded-full bg-green-500/10">
-              <Check className="h-6 w-6 text-green-600 dark:text-green-400" />
-            </div>
-            <p className="text-green-600 dark:text-green-400 font-medium text-center">
-              Vous êtes connecté en tant qu&apos;administrateur
-            </p>
-            <Button variant="outline" onClick={handleLogout} className="hover:scale-105 transition-all duration-200">
-              Se déconnecter
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
-
   return (
     <Card className="w-full max-w-md mx-auto border-0 shadow-2xl bg-gradient-to-br from-card via-card to-card/95">
       <CardHeader className="space-y-1 pb-6">
         <div className="flex items-center justify-center mb-2">
           <div className="p-3 rounded-full bg-primary/10">
-            <LogIn className="h-8 w-8 text-primary" />
+            <UserPlus className="h-8 w-8 text-primary" />
           </div>
         </div>
-        <CardTitle className="text-2xl font-bold text-center">Connexion</CardTitle>
+        <CardTitle className="text-2xl font-bold text-center">Créer un compte</CardTitle>
         <CardDescription className="text-center">
-          Connectez-vous pour accéder à votre espace personnel
+          Inscrivez-vous pour accéder à toutes les fonctionnalités
         </CardDescription>
       </CardHeader>
 
@@ -176,28 +175,62 @@ export function LoginForm() {
             <Separator className="w-full" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-card px-2 text-muted-foreground">Ou continuez avec</span>
+            <span className="bg-card px-2 text-muted-foreground">Ou inscrivez-vous avec</span>
           </div>
         </div>
 
-        {/* Error Message */}
+        {/* Error/Success Messages */}
         {error && (
           <div className="p-4 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg text-sm flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 shrink-0" />
             {error}
           </div>
         )}
+        {success && (
+          <div className="p-4 bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 rounded-lg text-sm flex items-center gap-2">
+            <Check className="h-4 w-4 shrink-0" />
+            {success}
+          </div>
+        )}
 
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="firstName">Prénom</Label>
+              <Input
+                id="firstName"
+                name="firstName"
+                placeholder="Jean"
+                value={formData.firstName}
+                onChange={handleChange}
+                required
+                className="transition-all duration-200 focus:scale-[1.01]"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lastName">Nom</Label>
+              <Input
+                id="lastName"
+                name="lastName"
+                placeholder="Dupont"
+                value={formData.lastName}
+                onChange={handleChange}
+                required
+                className="transition-all duration-200 focus:scale-[1.01]"
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="username">Nom d&apos;utilisateur</Label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
                 id="username"
-                placeholder="Entrez votre nom d'utilisateur"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                name="username"
+                placeholder="jeandupont"
+                value={formData.username}
+                onChange={handleChange}
                 className="pl-10 transition-all duration-200 focus:scale-[1.01]"
                 required
               />
@@ -205,23 +238,50 @@ export function LoginForm() {
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Mot de passe</Label>
-              <Link
-                href="/forgot-password"
-                className="text-xs text-primary hover:underline transition-colors"
-              >
-                Mot de passe oublié ?
-              </Link>
+            <Label htmlFor="email">Email</Label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="jean.dupont@email.com"
+                value={formData.email}
+                onChange={handleChange}
+                className="pl-10 transition-all duration-200 focus:scale-[1.01]"
+                required
+              />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Mot de passe</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
                 id="password"
+                name="password"
                 type="password"
-                placeholder="Entrez votre mot de passe"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={handleChange}
+                className="pl-10 transition-all duration-200 focus:scale-[1.01]"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                placeholder="••••••••"
+                value={formData.confirmPassword}
+                onChange={handleChange}
                 className="pl-10 transition-all duration-200 focus:scale-[1.01]"
                 required
               />
@@ -236,10 +296,10 @@ export function LoginForm() {
             {isLoading ? (
               <span className="flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Connexion en cours...
+                Inscription en cours...
               </span>
             ) : (
-              "Se connecter"
+              "Créer mon compte"
             )}
           </Button>
         </form>
@@ -247,9 +307,9 @@ export function LoginForm() {
 
       <CardFooter className="flex flex-col space-y-4 pt-2">
         <div className="text-center text-sm text-muted-foreground">
-          Vous n&apos;avez pas de compte ?{" "}
-          <Link href="/register" className="text-primary hover:underline font-medium transition-colors">
-            Créer un compte
+          Vous avez déjà un compte ?{" "}
+          <Link href="/login" className="text-primary hover:underline font-medium transition-colors">
+            Se connecter
           </Link>
         </div>
       </CardFooter>

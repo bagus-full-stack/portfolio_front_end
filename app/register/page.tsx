@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { LoginForm } from "@/components/login-form"
+import { RegisterForm } from "@/components/register-form"
 import { userService } from "@/services/UserServices"
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter()
   const [isChecking, setIsChecking] = useState(true)
 
@@ -31,7 +31,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 px-4 py-8">
-      <LoginForm />
+      <RegisterForm />
     </div>
   )
 }
