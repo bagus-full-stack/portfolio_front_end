@@ -19,6 +19,7 @@ import {
   Cell,
 } from "recharts"
 import { Eye, Users, Clock, Globe, Download, RefreshCw } from "lucide-react"
+import { userService } from "@/services/UserServices"
 
 // Données simulées pour les statistiques
 const visitData = [
@@ -60,8 +61,7 @@ export function AdminDashboard() {
   useEffect(() => {
     // Vérifier si window est défini (côté client uniquement)
     if (typeof window !== "undefined") {
-      const loggedIn = localStorage.getItem("adminLoggedIn")
-      if (loggedIn === "true") {
+      if (userService.isAuthenticated()) {
         setIsLoggedIn(true)
       }
     }
